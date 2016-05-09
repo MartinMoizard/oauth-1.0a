@@ -22,11 +22,11 @@ function hmac(hashFct, baseString, signingKey) {
     },
     true,
     ["sign"]
-  ).then(key =>
-    crypto.subtle.sign("HMAC", key, text2ua(baseString))
-  ).then(
-    signature => btoa(ua2text(new Uint8Array(signature)))
-  ).catch(console.error);
+  ).then(function(key) {
+    return crypto.subtle.sign("HMAC", key, text2ua(baseString));
+  }).then(function(signature) {
+    return btoa(ua2text(new Uint8Array(signature)));
+  }).catch(console.error);
 }
 
 /**
