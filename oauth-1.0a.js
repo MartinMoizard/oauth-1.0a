@@ -2,28 +2,30 @@ if (typeof(module) !== 'undefined' && typeof(exports) !== 'undefined') {
     module.exports = OAuth;
 }
 
-const encoder = new TextEncoder();
+const subtle = crypto.webkitSubtle || crypto.subtle;
 
 function ua2text(buf) {
   return String.fromCharCode.apply(null, buf)
 }
 
-function text2ua(str) {
-  return encoder.encode(str);
+function text2ua(s) {
+    var ua = new Uint8Array(s.length);
+    for (var i = 0; i < s.length; i++) {
+        ua[i] = s.charCodeAt(i);
+    }
+    return ua;
 }
 
 function hmac(hashFct, baseString, signingKey) {
-  return crypto.subtle.importKey(
+  const algo = { name:"HMAC", hash:{name: hashFct}};
+  return subtle.importKey(
     "raw",
     text2ua(signingKey).buffer,
-    {
-      name: "HMAC",
-      hash: {name: hashFct},
-    },
+    algo,
     true,
     ["sign"]
   ).then(function(key) {
-    return crypto.subtle.sign("HMAC", key, text2ua(baseString));
+    return subtle.sign(algo, key, text2ua(baseString));
   }).then(function(signature) {
     return btoa(ua2text(new Uint8Array(signature)));
   }).catch(console.error);
